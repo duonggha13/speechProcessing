@@ -1,10 +1,15 @@
+import os
+
 import nltk.data
-import keyboard
 import getch
 import sounddevice as sd
 import soundfile as sf
 import time
-import os
+#import urllib.request
+
+'''urlpath = 'vnexpress.vn'
+urlopen = urllib.request.urlopen(urlpath)
+url = urlopen'''
 
 
 topics = ['thoisu', 'gocnhin', 'thegioi', 'kinhdoanh', 'giaitri', 'thethao', 'phapluat', 'giaoduc', 'suckhoe', 'doisong', 'dulich', 'khoahoc', 'sohoa', 'xe', 'ykien', 'tamsu']
@@ -21,17 +26,22 @@ def sync_record(filename, duration, fs, channels):
 
 def main():
 	tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-	
+
 	for topic in topics:
 		filePathIn = './in/' + topic +'.txt'
+		outPath = './out/' + topic
+		if not os.path.exists(outPath):
+			os.makedirs(outPath)
+		textPathOut = outPath + '/description.txt'
+
 		fin = open(filePathIn)
 		data = fin.read()
 		fin.close()
 
 		sentences = tokenizer.tokenize(data)
 
-		filePathOut = './out/' + topic + '/description.txt'
-		fout = open(filePathOut, "w")
+
+		fout = open(textPathOut, "w")
 		fout.write(sentences[0] + '\n')
 
 		for sentence in sentences:
@@ -42,8 +52,10 @@ def main():
 			fout.write(namerecord + '\n')
 			fout.write(sentence + '\n')
 			sync_record(namerecord, 10, 16000, 1)
-			wait()
-			sd.stop()
+
+			wavOutPath = './out/' + topic + '/' + namerecord
+			os.rename(namerecord, wavOutPath)
+			#wait()
 		fout.close()
 
 if __name__ == '__main__':
